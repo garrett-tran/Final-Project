@@ -5,28 +5,30 @@ import cv2
 import random
 import time as t
 from matplotlib import pyplot as plt
+import pygame as pg
 
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
-class Ball:
-    def __init__(self, color, screen_width=600, screen_height=400):
-        self.color = color
+class Fruit:
+    def __init__(self, type, screen_width=600, screen_height=400):
+        self.type = type
         self.screen_width = screen_width
         self.screen_height = screen_height
-        self.respawn()
+        self.image = cv2.imread('data/apple.png', -1)
+        self.start()
 
-    def respawn(self):
-        pass
+    
+    def start(self):
+        self.x = random.randint(50, self.width)
+        self.y = random.randint(-150, 0)
     
     def draw(self):
         pass
 
 class Game:
     def __init__(self):
-        pass
-    def draw_basket(self):
-        pass
+        self.apple = Fruit("apple")
     def basket(self):
         # Load the overlay image with an alpha channel (transparency)
         cowboy_hat = cv2.imread('data/basket.png', -1)
@@ -40,6 +42,7 @@ class Game:
     
         while True:
             frame = video.read()[1]
+            frame = cv2.flip(frame, 1)
             # OpenCV reads images as BGR, we want gray and rgb
             img_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             img_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -62,7 +65,7 @@ class Game:
                                             (1.0 - alpha) * frame[y1:y2, x1:x2, c])
                 
                 # Display the resulting frame
-                cv2.imshow('Cowboy Hat', frame)
+            cv2.imshow('Cowboy Hat', frame)
                 
             # Break the loop when 'q' is pressed
             if cv2.waitKey(50) & 0xFF == ord('q'):
@@ -73,8 +76,5 @@ class Game:
         cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    # image_smile_detection(filepath="data/smiles.jpeg", display=True)
-    # video_smile_detection()
-    # draw_box_on_head()
     g = Game()
     g.basket()
