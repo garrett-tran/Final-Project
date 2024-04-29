@@ -11,11 +11,12 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 class Fruit:
-    def __init__(self, type, screen_width=1200, screen_height=800):
+    def __init__(self, type, screen_width=1200, screen_height=700):
         self.type = type
         self.screen_width = screen_width
         self.screen_height = screen_height
-        self.image = cv2.imread('data/apple.png', -1)
+        self.image = pygame.transform.scale(pygame.image.load('data/fruit.png'), (50, 50))
+    
         self.start()
 
     
@@ -23,14 +24,16 @@ class Fruit:
         self.x = random.randint(50, self.screen_width)
         self.y = random.randint(-150, 0)
     
-    def draw(self):
-        pass
+    def update(self):
+        self.y += 5
+        if self.y >= self.screen_height:
+            self.start()
 
 class Game:
     def __init__(self):
         pygame.init()
         self.apple = Fruit("apple")
-        width, height = 1200, 800
+        width, height = 1200, 700
         self.screen = pygame.display.set_mode((width, height))
         pygame.display.set_caption("Basket Game")
         self.clock = pygame.time.Clock()
@@ -78,7 +81,8 @@ class Game:
             surf = pygame.transform.rotate(surf, -90)
             surf = pygame.transform.flip(surf, True, False)
             self.screen.blit(surf, (0,0))
-            
+            self.screen.blit(self.apple.image, (self.apple.x, self.apple.y))
+            self.apple.update()
             
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
