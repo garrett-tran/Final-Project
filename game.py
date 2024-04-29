@@ -5,13 +5,13 @@ import cv2
 import random
 import time as t
 from matplotlib import pyplot as plt
-import pygame as pg
+import pygame
 
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 class Fruit:
-    def __init__(self, type, screen_width=600, screen_height=400):
+    def __init__(self, type, screen_width=1200, screen_height=800):
         self.type = type
         self.screen_width = screen_width
         self.screen_height = screen_height
@@ -20,7 +20,7 @@ class Fruit:
 
     
     def start(self):
-        self.x = random.randint(50, self.width)
+        self.x = random.randint(50, self.screen_width)
         self.y = random.randint(-150, 0)
     
     def draw(self):
@@ -28,10 +28,16 @@ class Fruit:
 
 class Game:
     def __init__(self):
+        pygame.init()
         self.apple = Fruit("apple")
+        width, height = 1200, 800
+        self.screen = pygame.display.set_mode((width, height))
+        pygame.display.set_caption("Basket Game")
+        self.clock = pygame.time.Clock()
     def basket(self):
         # Load the overlay image with an alpha channel (transparency)
-        cowboy_hat = cv2.imread('data/basket.png', -1)
+        bk = cv2.imread('data/basket.png', -1)
+        self.basket = pygame.image.load('data/basket.png')
         # Capture video from the webcam
         video = cv2.VideoCapture(0)
 
@@ -53,27 +59,43 @@ class Game:
             for (start_x, start_y, width, height) in faces:
 
                 # Where to place the cowboy hat on the screen
-                y1, y2 = start_y-cowboy_hat.shape[0], start_y
-                x1, x2 = start_x, start_x + cowboy_hat.shape[1]
+                y1, y2 = start_y-bk.shape[0], start_y
+                x1, x2 = start_x, start_x + bk.shape[1]
 
                 # Saving the alpha values (transparencies)
-                alpha = cowboy_hat[:, :, 3] / 255.0
+                alpha = bk[:, :, 3] / 255.0
 
-                # Overlays the image onto the frame (Don't change this)
+                """ Overlays the image onto the frame (Don't change this)
                 for c in range(0, 3):
-                    frame[y1:y2, x1:x2, c] = (alpha * cowboy_hat[:, :, c] +
+                    frame[y1:y2, x1:x2, c] = (alpha * bk[:, :, c] +
                                             (1.0 - alpha) * frame[y1:y2, x1:x2, c])
-                
+                """
+                self.screen.blit(self.basket, (x1,y1))
+                print(x1)
+            pygame.display.flip()
+            self.clock.tick(20)
+            surf = pygame.surfarray.make_surface(img_rgb)
+            surf = pygame.transform.rotate(surf, -90)
+            surf = pygame.transform.flip(surf, True, False)
+            self.screen.blit(surf, (0,0))
+            
+            
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    # Release the capture
+                    video.release()
+                    cv2.destroyAllWindows()
+                    exit()
+                    
                 # Display the resulting frame
-            cv2.imshow('Cowboy Hat', frame)
-                
+            #cv2.imshow('Cowboy Hat', frame)
+            
             # Break the loop when 'q' is pressed
-            if cv2.waitKey(50) & 0xFF == ord('q'):
-                break
+            #if cv2.waitKey(50) & 0xFF == ord('q'):
+            #   break
 
-        # Release the capture
-        video.release()
-        cv2.destroyAllWindows()
+        
 
 if __name__ == "__main__":
     g = Game()
