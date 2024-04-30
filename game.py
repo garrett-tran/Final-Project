@@ -21,7 +21,7 @@ class Fruit:
 
     
     def start(self):
-        self.x = random.randint(50, self.screen_width)
+        self.x = random.randint(50, self.screen_width-50)
         self.y = random.randint(-150, 0)
     
     def update(self):
@@ -33,6 +33,8 @@ class Game:
     def __init__(self):
         pygame.init()
         self.apple = Fruit("apple")
+        self.cherry = Fruit("cherry")
+        self.cherry = Fruit("cherry")
         width, height = 1200, 700
         self.screen = pygame.display.set_mode((width, height))
         pygame.display.set_caption("Basket Game")
@@ -46,7 +48,8 @@ class Game:
 
         face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
-        
+        x1, x2 = 0, 0
+        y1, y2 = 0, 0
 
     
         while True:
@@ -74,7 +77,6 @@ class Game:
                                             (1.0 - alpha) * frame[y1:y2, x1:x2, c])
                 """
                 self.screen.blit(self.basket, (x1,y1))
-                print(x1)
             pygame.display.flip()
             self.clock.tick(20)
             surf = pygame.surfarray.make_surface(img_rgb)
@@ -83,6 +85,9 @@ class Game:
             self.screen.blit(surf, (0,0))
             self.screen.blit(self.apple.image, (self.apple.x, self.apple.y))
             self.apple.update()
+
+            if (self.apple.x > x1 and self.apple.x < x2)  and (self.apple.y > y1 and self.apple.y < y1 + 10):
+                self.apple.start()
             
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
