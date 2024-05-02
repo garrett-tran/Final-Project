@@ -15,7 +15,7 @@ class Fruit:
         self.type = type
         self.screen_width = screen_width
         self.screen_height = screen_height
-        self.image = pygame.transform.scale(pygame.image.load('data/fruit.png'), (50, 50))
+        self.image = pygame.transform.scale(pygame.image.load('data/' + self.type + '.png'), (50, 50))
     
         self.start()
 
@@ -24,17 +24,31 @@ class Fruit:
         self.x = random.randint(50, self.screen_width-50)
         self.y = random.randint(-150, 0)
     
-    def update(self):
-        self.y += 5
+    def update(self, speed):
+        self.y += speed
         if self.y >= self.screen_height:
             self.start()
 
 class Game:
     def __init__(self):
         pygame.init()
-        self.apple = Fruit("apple")
+        self.fruits = []
+        self.apple = Fruit("fruit")
+        self.fruits.append(self.apple)
         self.cherry = Fruit("cherry")
-        self.cherry = Fruit("cherry")
+        self.fruits.append(self.cherry)
+        self.orange = Fruit("orange")
+        self.fruits.append(self.orange)
+        self.avacado = Fruit("avacado")
+        self.fruits.append(self.avacado)
+        self.peach = Fruit("peach")
+        self.fruits.append(self.peach)
+        self.speed = 5
+        self.score = 0 
+
+        self.font = pygame.font.Font(None, 35)
+        
+
         width, height = 1200, 700
         self.screen = pygame.display.set_mode((width, height))
         pygame.display.set_caption("Basket Game")
@@ -83,11 +97,18 @@ class Game:
             surf = pygame.transform.rotate(surf, -90)
             surf = pygame.transform.flip(surf, True, False)
             self.screen.blit(surf, (0,0))
-            self.screen.blit(self.apple.image, (self.apple.x, self.apple.y))
-            self.apple.update()
+            self.screen.blit(self.font.render("Score: " + str(self.score), True, (255, 0, 0)), (0, 100))
 
-            if (self.apple.x > x1 and self.apple.x < x2)  and (self.apple.y > y1 and self.apple.y < y1 + 10):
-                self.apple.start()
+            
+            
+            for fruit in self.fruits:
+                self.screen.blit(fruit.image, (fruit.x, fruit.y))
+                fruit.update(self.speed)
+
+                if (fruit.x > x1 and fruit.x < x2)  and (fruit.y > y1 and fruit.y < y1 + 20):
+                    fruit.start()
+                    self.score +=1
+                    self.speed +=0.2
             
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
