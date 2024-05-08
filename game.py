@@ -47,6 +47,8 @@ class Game:
         self.score = 0 
 
         self.font = pygame.font.Font(None, 35)
+
+        self.mode = self.apple
         
 
         width, height = 1200, 700
@@ -91,6 +93,7 @@ class Game:
                                             (1.0 - alpha) * frame[y1:y2, x1:x2, c])
                 """
                 self.screen.blit(self.basket, (x1,y1))
+                self.screen.blit(pygame.transform.scale_by(self.mode.image, 1.75), (x1+50, y1+5))
             pygame.display.flip()
             self.clock.tick(20)
             surf = pygame.surfarray.make_surface(img_rgb)
@@ -105,7 +108,7 @@ class Game:
                 self.screen.blit(fruit.image, (fruit.x, fruit.y))
                 fruit.update(self.speed)
 
-                if (fruit.x > x1 and fruit.x < x2)  and (fruit.y > y1 and fruit.y < y1 + 20):
+                if (fruit.x > x1 and fruit.x < x2)  and (fruit.y > y1 and fruit.y < y1 + 20) and self.mode == fruit:
                     fruit.start()
                     self.score +=1
                     self.speed +=0.2
@@ -117,6 +120,18 @@ class Game:
                     video.release()
                     cv2.destroyAllWindows()
                     exit()
+                if event.type == pygame.KEYDOWN:
+                    #Logic for interacting with each appliance
+                    if event.key == pygame.K_1:
+                        self.mode = self.apple
+                    if event.key == pygame.K_2:
+                        self.mode = self.cherry
+                    if event.key == pygame.K_3:
+                        self.mode = self.orange
+                    if event.key == pygame.K_4:
+                        self.mode = self.avacado
+                    if event.key == pygame.K_5:
+                        self.mode = self.peach
                     
                 # Display the resulting frame
             #cv2.imshow('Cowboy Hat', frame)
