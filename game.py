@@ -1,37 +1,39 @@
-import mediapipe as mp
-from mediapipe import solutions
-from mediapipe.framework.formats import landmark_pb2
 import cv2
 import random
-import time as t
-from matplotlib import pyplot as plt
 import pygame
 
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
+SCREEN_HEIGHT = 700
+SCREEN_WIDTH = 1200
 class Fruit:
-    def __init__(self, type, screen_width=1200, screen_height=700):
+    def __init__(self, type):
         self.type = type
-        self.screen_width = screen_width
-        self.screen_height = screen_height
         self.image = pygame.transform.scale(pygame.image.load('data/' + self.type + '.png'), (50, 50))
     
         self.start()
-
     
+    # Resets fruits to a random height and width after they are collected or fall to the bottom
     def start(self):
-        self.x = random.randint(50, self.screen_width-50)
-        self.y = random.randint(-150, 0)
+        self.x = random.randint(50, SCREEN_WIDTH-50)
+        self.y = random.randint(-500, 0)
     
+    #Moves fruits down the screen every tick
     def update(self, speed):
         self.y += speed
-        if self.y >= self.screen_height:
-            self.start()
+        
 
 class Game:
     def __init__(self):
         pygame.init()
+        self.speed = 3
+        self.score = 0 
+        self.lives = 10
+        self.font = pygame.font.Font(None, 35)
+        self.key = pygame.transform.scale(pygame.image.load('data/key.png'), (100, 300))
+
+        #Creating fruit objects and adding them to a list
         self.fruits = []
         self.apple = Fruit("fruit")
         self.fruits.append(self.apple)
@@ -43,10 +45,9 @@ class Game:
         self.fruits.append(self.avacado)
         self.peach = Fruit("peach")
         self.fruits.append(self.peach)
-        self.speed = 5
-        self.score = 0 
+        
 
-        self.font = pygame.font.Font(None, 35)
+       
 
         self.mode = self.apple
         
@@ -56,6 +57,7 @@ class Game:
         pygame.display.set_caption("Basket Game")
         self.clock = pygame.time.Clock()
     def basket(self):
+        """ Lines 60-90 adapted from cowboy hat lab code"""
         # Load the overlay image with an alpha channel (transparency)
         bk = cv2.imread('data/basket.png', -1)
         self.basket = pygame.image.load('data/basket.png')
@@ -80,30 +82,30 @@ class Game:
             # Loop through each face found
             for (start_x, start_y, width, height) in faces:
 
-                # Where to place the cowboy hat on the screen
                 y1, y2 = start_y-bk.shape[0], start_y
                 x1, x2 = start_x, start_x + bk.shape[1]
 
                 # Saving the alpha values (transparencies)
                 alpha = bk[:, :, 3] / 255.0
 
-                """ Overlays the image onto the frame (Don't change this)
-                for c in range(0, 3):
-                    frame[y1:y2, x1:x2, c] = (alpha * bk[:, :, c] +
-                                            (1.0 - alpha) * frame[y1:y2, x1:x2, c])
-                """
                 self.screen.blit(self.basket, (x1,y1))
                 self.screen.blit(pygame.transform.scale_by(self.mode.image, 1.75), (x1+50, y1+5))
             pygame.display.flip()
             self.clock.tick(20)
+
+            #Logic for displaying webcam using pygame
             surf = pygame.surfarray.make_surface(img_rgb)
             surf = pygame.transform.rotate(surf, -90)
             surf = pygame.transform.flip(surf, True, False)
             self.screen.blit(surf, (0,0))
-            self.screen.blit(self.font.render("Score: " + str(self.score), True, (255, 0, 0)), (0, 100))
+
+            #Logic for displaying UI
+            self.screen.blit(self.font.render("Score: " + str(self.score), True, (255, 0, 0)), (0, 10))
+            self.screen.blit(self.font.render("Lives: " + str(self.lives), True, (255, 0, 0)), (0, 40))
+            self.screen.blit(self.key, (0,70))
 
             
-            
+            #Logic for reseting fruit both after it is collected or if it falls to the bottom
             for fruit in self.fruits:
                 self.screen.blit(fruit.image, (fruit.x, fruit.y))
                 fruit.update(self.speed)
@@ -112,6 +114,14 @@ class Game:
                     fruit.start()
                     self.score +=1
                     self.speed +=0.2
+                if fruit.y >= SCREEN_HEIGHT:
+                    self.lives -=1
+                    if self.lives == 0:
+                        print("Score: " + str(self.score))
+                        exit(0)
+                        
+                    fruit.start()
+            
             
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -121,7 +131,7 @@ class Game:
                     cv2.destroyAllWindows()
                     exit()
                 if event.type == pygame.KEYDOWN:
-                    #Logic for interacting with each appliance
+                    #Logic for changing between being able to collect each fruit
                     if event.key == pygame.K_1:
                         self.mode = self.apple
                     if event.key == pygame.K_2:
@@ -133,12 +143,6 @@ class Game:
                     if event.key == pygame.K_5:
                         self.mode = self.peach
                     
-                # Display the resulting frame
-            #cv2.imshow('Cowboy Hat', frame)
-            
-            # Break the loop when 'q' is pressed
-            #if cv2.waitKey(50) & 0xFF == ord('q'):
-            #   break
 
         
 
